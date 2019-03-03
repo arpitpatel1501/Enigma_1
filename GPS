@@ -1,0 +1,38 @@
+#include <LiquidCrystal.h>
+#include <SoftwareSerial.h>
+#include <TinyGPS++.h>
+//long   lat,lon; // create variable for latitude and longitude object
+float lati = 28.5458,lon = 77.1703; // create variable for latitude and longitude object 
+SoftwareSerial ss(3,4);//rx,tx
+LiquidCrystal lcd(A0,A1,A2,A3,A4,A5);
+TinyGPSPlus gps; // create gps object
+void setup(){
+  Serial.begin(9600); // connect serial
+  //Serial.println("The GPS Received Signal:");
+  ss.begin(9600); // connect gps sensor
+}
+
+void loop(){
+    while (ss.available() > 0)
+      gps.encode(ss.read());
+    if (gps.location.isUpdated())
+    {
+      Serial.print("LAT="); Serial.print(gps.location.lat(), 6);
+      Serial.print("LNG="); Serial.println(gps.location.lng(), 6);
+    }
+    //gps.f_get_position(&lat,&lon); // get latitude and longitude
+    // display position
+    
+//    Serial.print("Position: ");
+//    Serial.print("Latitude:");
+//    Serial.print(lati,6);
+//    Serial.print(";");
+//    Serial.print("Longitude:");
+//    Serial.println(lon,6); 
+//    Serial.print(lati);
+//    Serial.print(" ");
+    
+    
+  delay(1000);
+  
+}
