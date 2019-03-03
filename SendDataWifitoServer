@@ -1,0 +1,112 @@
+#include <ESP8266WiFi.h>
+#include <SoftwareSerial.h>
+const char* ssid     = "DESKTOP";  //wifi name
+const char* password = "Foram@123";  //wifi psswd
+
+const char* host = "http://10.20.37.126/";
+const char* thing  = "testJ7";
+String thing_content;
+
+SoftwareSerial Inter(D2,D3);
+SoftwareSerial Inter1(D0,D1);
+
+void setup() {
+  Serial.begin(9600);
+  Inter.begin(4800);
+  Inter1.begin(4800);
+  pinMode(D2,INPUT);
+  pinMode(D3,OUTPUT);
+  /*while(!Serial){
+    Serial.println("waiting for serial");
+  }*/
+
+  // We start by connecting to a WiFi network
+
+  Serial.println();
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  
+  WiFi.begin(ssid, password);
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("");
+  Serial.println("WiFi connected");  
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+  delay(2000);
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  /*if(Serial.available()){
+     thing_content = Serial.readString();
+  }*/
+  //thing_content = "Sunlight=28&Moisture=29&CurrentHumidity=40&CurrentTemperature=25&PirSecurity=0";
+  
+
+  Serial.print("connecting to ");
+  Serial.println(host);
+  
+  // Use WiFiClient class to create TCP connections
+  WiFiClient client;
+  const int httpPort = 2309;
+  if (!client.connect(host, httpPort)) {
+    Serial.println("connection failed");
+        //return;
+  }
+  else{
+    Serial.println("connection succeed");
+  }
+   // We now create a URI for the request
+   
+   while(Inter.available()>0){
+       Serial.println("Reading.........................................................................................................");
+       thing_content = Inter.readString();
+       
+   }
+
+   Serial.println(thing_content);
+  String url = "/STDS/Authority/home.aspx/";
+  url = url + "?";
+  url = url + thing+"=";
+  url = url+ thing_content;
+  
+  Serial.print("Requesting URL: ");
+  Serial.println(url);
+
+  // This will send the request to the server
+  client.print(String("GET ") + url + " HTTP/1.1\r\n" +
+               "Host: " + host + "\r\n" + 
+               "Connection: close\r\n\r\n");
+  
+  /*Serial.print(String("GET ") + url + " HTTP/1.1\r\n" +
+               "Host: " + host + "\r\n" + 
+               "Connection: close\r\n\r\n");*/
+  /*int timeout = millis() + 5000;
+  while (client.available() == 0) {
+    if (timeout - millis() < 0) {
+      Serial.println(">>> Client Timeout !");
+      client.stop();
+      return;
+    }
+  }
+   Serial.println("Sent to client");
+  
+  // Read all the lines of the reply from server and print them to Serial
+  while(client.available()){
+    String line = client.readStringUntil('\r');
+    Serial.print("\nMessage From Client:");
+    Serial.print(line);
+  }
+  
+  Serial.println();
+  Serial.println("closing connection");*/
+  delay(5000);
+ 
+}
+
