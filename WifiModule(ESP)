@@ -1,0 +1,82 @@
+#include <ESP8266WiFi.h>
+#include <SoftwareSerial.h>
+const char* ssid     = "A1";  //wifi name
+const char* password = "11019990";  //wifi psswd
+
+const char* host = "http://10.20.37.126/";
+const char* thing  = "testJ7";
+String thing_content;
+
+SoftwareSerial Inter(D2,D3);
+
+void setup() {
+  Serial.begin(9600);
+  Inter.begin(4800);
+  pinMode(D2,INPUT);
+  pinMode(D3,OUTPUT);
+  /*while(!Serial){
+    Serial.println("waiting for serial");
+  }*/
+
+  // We start by connecting to a WiFi network
+
+  Serial.println();
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+  
+  WiFi.begin(ssid, password);
+  
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println("");
+  Serial.println("WiFi connected");  
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+  delay(2000);
+}
+
+void loop() {
+ 
+  Serial.print("connecting to ");
+  Serial.println(host);
+  
+  // Use WiFiClient class to create TCP connections
+  WiFiClient client;
+  const int httpPort = 80;
+  if (!client.connect(host, httpPort)) {
+    Serial.println("connection failed");
+        return;
+  }
+  else{
+    Serial.println("connection succeed");
+  }
+   // We now create a URI for the request
+   
+   while(Inter.available()>0){
+       Serial.println("Reading.........................................................................................................");
+       thing_content = Inter.readString();
+   }
+
+   Serial.println(thing_content);
+  String url = "/Test/";
+  url = url + "?";
+  url = url + thing;
+  url = url+ thing_content;
+  
+  Serial.print("Requesting URL: ");
+  Serial.println(url);
+
+  // This will send the request to the server
+  client.print(String("GET ") + url + " HTTP/1.1\r\n" +
+               "Host: " + host + "\r\n" + 
+               "Connection: close\r\n\r\n");
+  
+  
+  delay(5000);
+ 
+}
+
